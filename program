@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Зворотній відлік до суботи</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 60px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+
+        .countdown-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .days-number {
+            font-size: 6em;
+            font-weight: 800;
+            color: white;
+            line-height: 1;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .days-label {
+            font-size: 1.5em;
+            color: white;
+            margin-top: 10px;
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .info-text {
+            color: #666;
+            font-size: 1.1em;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+
+        .date-info {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 25px;
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        .current-date {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .emoji {
+            font-size: 3em;
+            margin-bottom: 20px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 40px 25px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .days-number {
+                font-size: 4em;
+            }
+            
+            .days-label {
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="emoji">📅</div>
+        <h1>Зворотній відлік</h1>
+        
+        <div class="countdown-display">
+            <div class="days-number" id="daysCount">-</div>
+            <div class="days-label" id="daysLabel">днів</div>
+        </div>
+        
+        <div class="info-text" id="infoText">
+            Завантаження...
+        </div>
+        
+        <div class="date-info">
+            <div>Сьогодні: <span class="current-date" id="currentDate">-</span></div>
+            <div style="margin-top: 10px;">Наступна субота: <span class="current-date" id="nextSaturday">-</span></div>
+        </div>
+    </div>
+
+    <script>
+        function getDaysWord(days) {
+            if (days === 0) return 'день';
+            if (days === 1) return 'день';
+            if (days >= 2 && days <= 4) return 'дні';
+            return 'днів';
+        }
+
+        function getInfoText(days) {
+            if (days === 0) {
+                return '🎉 Сьогодні субота! Чудового дня!';
+            } else if (days === 1) {
+                return '🌟 Завтра субота! Майже дочекались!';
+            } else if (days === 2) {
+                return '⏰ Післязавтра субота! Ще трошки!';
+            } else {
+                return `⌛ До вихідних залишилось ще ${days} ${getDaysWord(days)}`;
+            }
+        }
+
+        function formatDate(date) {
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            return date.toLocaleDateString('uk-UA', options);
+        }
+
+        function calculateDaysToSaturday() {
+            const today = new Date();
+            const currentDay = today.getDay(); // 0 (неділя) - 6 (субота)
+            
+            let daysUntilSaturday;
+            
+            if (currentDay === 6) {
+                // Сьогодні субота
+                daysUntilSaturday = 0;
+            } else if (currentDay === 0) {
+                // Неділя - до суботи 6 днів
+                daysUntilSaturday = 6;
+            } else {
+                // Інші дні тижня
+                daysUntilSaturday = 6 - currentDay;
+            }
+            
+            // Обчислюємо дату наступної суботи
+            const nextSaturday = new Date(today);
+            nextSaturday.setDate(today.getDate() + daysUntilSaturday);
+            
+            return {
+                days: daysUntilSaturday,
+                today: today,
+                saturday: nextSaturday
+            };
+        }
+
+        function updateCountdown() {
+            const result = calculateDaysToSaturday();
+            
+            document.getElementById('daysCount').textContent = result.days;
+            document.getElementById('daysLabel').textContent = getDaysWord(result.days);
+            document.getElementById('infoText').textContent = getInfoText(result.days);
+            document.getElementById('currentDate').textContent = formatDate(result.today);
+            document.getElementById('nextSaturday').textContent = formatDate(result.saturday);
+        }
+
+        // Оновлюємо при завантаженні сторінки
+        updateCountdown();
+        
+        // Оновлюємо кожну хвилину (на випадок, якщо сторінка залишається відкритою до півночі)
+        setInterval(updateCountdown, 60000);
+    </script>
+</body>
+</html>
